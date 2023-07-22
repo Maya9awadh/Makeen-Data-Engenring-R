@@ -1,0 +1,179 @@
+---
+title: "Analyzing the Orange Tree Dataset"
+author: "Maya Al Hatmi, Asma Al Moqbali"
+date: "7/21/2023"
+output:
+  html_document:
+    df_print: paged
+    theme: cerulean
+    toc: true
+    toc_float: true
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+![Orange](https://backyardcitrustrees.com/cdn/shop/products/Page_Orange_Tree-100_500x500.jpg?v=1578543160)
+
+## Introduction
+**R Markdown** is a powerful tool that can be used to combine text, code, and equations in a single document. **The orange tree dataset** is a classic dataset that provides 35 observations with 3 variables. It provides the age (in days) and circumference (in mm) for five type of Orange trees. We have manipulate,  visualize data and  built a  regression model to predict the age of the orange tree based on the given circumference.
+
+## Objective
+Here, we are analyzing different aspects of orange tree  by doing Exploratory,visualization and regression Data Analysis.
+
+
+Frist,we are going to import the libraries
+```{r  pressure_library, echo=TRUE,results='hide',warning=FALSE,message=FALSE}
+library(ggplot2)
+library(hrbrthemes)
+library(tidyverse)
+library(viridis)
+```
+
+
+load the data and display the head 
+```{r  pressure_data, echo=TRUE}
+data=data.frame(Orange)
+head(Orange)
+```
+We perform some initial EDA using the DataExplorer package.
+```{r pressure_report, echo=TRUE,results='hide',warning=FALSE,message=FALSE}
+library(DataExplorer)
+create_report(Orange)
+```
+```{r include, echo = FALSE}
+library(knitr)
+include_url("report.html")
+```
+check for null values
+
+```{r  pressure_null, echo=TRUE}
+is.null(data)
+```
+No null values are display
+
+```{r  pressure_summary, echo=TRUE}
+summary(data)
+```
+**age Column:**
+The smallest age in the dataset is 118.0 days.
+25% of the trees have an age less than or equal to 484.0 days.
+50% of the trees have an age less than or equal to 1004.0 days (also known as the second quartile).
+The average age of all the trees is approximately 922.1 days.
+75% of the trees have an age less than or equal to 1372.0 days.
+The oldest tree in the dataset is 1582.0 days.
+**circumference Column:**
+The smallest circumference in the dataset is 30.0 mm.
+25% of the trees have a circumference less than or equal to 65.5 mm.
+50% of the trees have a circumference less than or equal to 115.0 mm (also known as the second quartile).
+The average circumference of all the trees is approximately 115.9 mm.
+75% of the trees have a circumference less than or equal to 161.5 mm.
+The largest circumference in the dataset is 214.0 mm.
+
+```{r  pressure_cor, echo=TRUE}
+attach(data)
+cor(circumference,age)
+```
+we have calculate the correlation between circumference and age of tree the correlation coefficient of 0.9135189 suggests a strong positive linear relationship between circumference and age , suggesting that circumference and age are highly positively associated with each other. As the circumference of the orange tree increases, its age tends to increase as well.
+
+## Visualization
+
+**Scatter plots** 
+```{r pressure, echo=TRUE,warning=FALSE}
+plot(circumference, age)
+```
+
+Scatter plot represent that the points on the scatter plot are clustered closely around the fit line with a clear upward trend, it confirms a positive linear relationship between age and circumference.
+
+
+```{r pressure_scatter, echo=TRUE,warning=FALSE}
+ggplot(data, aes(x=circumference, y=age, color=Tree)) + 
+  geom_point(size=2) +
+    theme_ipsum()
+```
+
+The above scatter plot summarizes the relationship of age and circumference for different types of orange trees it represent  highlights the different growth patterns of orange trees of different types. Type 4 trees experience a more rapid increase in circumference, reaching the highest values among all types, while Type 3 trees exhibit slower growth and have a smaller circumference compared to the other types at the same age.
+
+
+**bar plot of the tree circumference**
+```{r pressure_bar, echo=TRUE,warning=FALSE}
+ggplot(data, aes(x=factor(Tree), y=circumference,fill=Tree, color=Tree)) + 
+  geom_bar(stat='identity',position = 'dodge')
+```
+
+Bar plot shows that tree of type 4 has the highest circumference among all the trees. Its bar in the plot is the tallest, indicating its large size compared to the other trees. however, for a type 3 orange tree has the least circumference among all the trees. indicating its smaller size compared to the other trees.
+
+**box plot of circumference among different type of tree**
+```{r pressure_box, echo=TRUE,warning=FALSE}
+data %>%
+  ggplot( aes(x=Tree, y=circumference, fill=Tree)) +
+  geom_boxplot() +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6, option="A") +
+  theme_ipsum() +
+  theme(
+    legend.position="none",
+    plot.title = element_text(size=11)
+  ) +
+  ggtitle("Basic boxplot") +
+  xlab("")
+```
+```{r pressure_jitter, echo=TRUE,warning=FALSE}
+data %>%
+  ggplot( aes(x=Tree, y=circumference, fill=Tree)) +
+  geom_boxplot() +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  theme_ipsum() +
+  theme(
+    legend.position="none",
+    plot.title = element_text(size=11)
+  ) +
+  ggtitle("A boxplot with jitter") +
+  xlab("")
+```
+
+
+Based on the box plot above Type 4 has the highest median circumference among all the types. The median value falls closer to the upper end of the box. Additionally, the box itself is larger, suggesting a wider range of circumference values for this type. 
+Type 2 and 5 has a moderately large box, indicating a significant spread of circumference values. suggesting a wide range of circumference values. However, its median lower than that of Type 4. 
+Type 1 and 3, suggesting a narrower range of circumference values. The median value falls close to the upper of the box, Type 3 has the smallest median circumference among all the types. 
+
+## Linear Regression Model
+
+```{r  pressure_lm, echo=TRUE}
+model <- lm(age ~ circumference , data = Orange)
+summary(model)
+```
+
+```{r  pressure_plot, echo=TRUE}
+plot(model)
+```
+The output appears to be the result of a linear regression analysis between the variable age and circumference in the data set Orange
+The coefficients are used to form the equation of the linear regression line:
+**age = 16.6036 + 7.8160 * circumference**
+**Intercept (16.6036)**  predicted age when the circumference of the orange tree is zero. However, since circumference cannot be negative, this interpretation is not practically meaningful in this context.
+**Coefficient** for Circumference (7.8160 indicates the change in the predicted age for every one-unit increase in the circumference of the orange tree. In this case, for each additional unit of circumference, the predicted age increases by 7.8160 years.
+The "Pr(>|t|)" column provides the **p-value**, which is used to test the significance of each coefficient. In this case, the circumference variable is highly significant (p-value: 1.93e-14)
+Multiple R-squared and Adjusted R-squared:
+The **multiple R-squared** is a measure of how well the model fits the data. It represents the proportion of variance in the age variable that can be explained by the circumference variable. In this case, the multiple R-squared is 0.8345, indicating that approximately 83.45% of the variance in age can be explained by circumference.
+The **adjusted R-squared** adjusts the multiple R-squared for the number of predictors in the model. It penalizes the inclusion of irrelevant predictors. In this case, the adjusted R-squared is 0.8295, which is slightly lower than the multiple R-squared. -
+**F-statistic and p-value**:
+The F-statistic is used to test the overall significance of the model. It tests whether there is a significant linear relationship between the predictor circumference and the response age. In this case, the F-statistic is 166.4, and the p-value is 1.931e-14 (extremely small). This indicates that the model is highly significant, and there is a strong linear relationship between age and circumference.
+
+
+## Making a Preduction
+
+```{r  pressure_predict, echo=TRUE,warning=FALSE,message=FALSE}
+circumferenceDF <- data.frame(circumference = 1243)
+age <- predict(model, circumferenceDF)
+
+# Display the age
+cat("The age is:", age)
+```
+
+Above code lies in its ability to make predictions based on the given (circumference) using a pre-trained linear regression model.
+
+## conclusion
+
+In conclusion, our project investigated five types of orange trees and identified Type 4 as the most likely to achieve the highest circumference. Additionally, we observed a positive relationship between circumference and age. The predictive model we developed holds promise for age estimation. However, we emphasize the importance of increasing the sample size to further enhance the model's accuracy.
+
